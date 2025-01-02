@@ -81,6 +81,11 @@ class Assembler(QtWidgets.QDialog):
         self.rename_btn = QtWidgets.QPushButton('Rename')
         self.rename_grp_layout.addWidget(self.rename_btn)
 
+        # Add Apply Button QPushButton
+
+        self.apply_btn = QtWidgets.QPushButton('Apply')
+        self.rename_grp_layout.addWidget(self.apply_btn)
+
         # DEBUG SECTION
         self.test = QtWidgets.QPushButton('Debug')
         self.central_layout.addWidget(self.test)
@@ -90,6 +95,8 @@ class Assembler(QtWidgets.QDialog):
         self.test.clicked.connect(self.get_current_context)
         self.search_btn.clicked.connect(self.on_search_btn_executed)
         self.search_result_list.itemSelectionChanged.connect(self.on_list_item_changed)
+        self.rename_btn.clicked.connect(self.on_rename_btn_executed)
+        self.apply_btn.clicked.connect(self.apply_all)
 
         self.setLayout(self.central_layout)
 
@@ -123,6 +130,7 @@ class Assembler(QtWidgets.QDialog):
         self.var_occurrences_map = {}
         self.populate_search_result_list()
         self.search_result_list.item(0).setSelected(True)
+        self.search_result_list.setCurrentRow(0)
         self.populate_code_editor()
 
     def populate_search_result_list(self) -> None:
@@ -142,7 +150,7 @@ class Assembler(QtWidgets.QDialog):
         # Debug
         """if self.search_result_list.count() > 0:
             first_item = self.search_result_list.item(0)
-            print(first_item.data(QtCore.Qt.UserRole))"""   
+            print(first_item.data(QtCore.Qt.UserRole))"""
 
     def get_selection(self, widget):
         """
@@ -151,22 +159,124 @@ class Assembler(QtWidgets.QDialog):
         selected = widget.selectedItems()
         return selected[0] if selected else None
 
-    def populate_code_editor(self):
+    def get_current_key(self):
         """
-        Populate the code editor with the snippet data from the selected list item.
+        Retrieves the key from `self.var_occurrences_map` corresponding to the currently selected item
+        in the search results list widget.
+
+        - Uses the `get_selection` method to obtain the selected item.
+        - Matches the selected item's text with the `path()` of keys in `self.var_occurrences_map`.
+        - If no match is found, prints an error message and returns None.
+
+        :return: The matching key (`node_key`) or None if not found.
         """
         selected_item = self.get_selection(self.search_result_list)
         if selected_item:
 
-            current_code = selected_item.data(QtCore.Qt.UserRole)
+            # current_code = selected_item.data(QtCore.Qt.UserRole)
+            node_key = next((key for key in self.var_occurrences_map if key.path() == selected_item.text()), None)
+            if not node_key:
+                print("Error: Selected node not found in var_occurrences_map")
+                return
+        return node_key
 
+    def get_current_code(self):
+        """
+        Retrieves the current code associated with the currently selected item in the list widget.
+        :return: The current code as a string.
+        """
+        node_key = self.get_current_key()
+
+        current_code = self.var_occurrences_map[node_key]
+
+        return current_code
+
+    def populate_code_editor(self):
+        """
+        Populate the code editor with the snippet data from the selected list item.
+        :return: None
+        """
+
+        current_code = self.get_current_code()
+        if current_code:
             self.code_edit.setPlainText(current_code)
         else:
 
             self.code_edit.setPlainText("")
 
     def on_list_item_changed(self):
+        """
+        Populates the code editor when the selection in the search results list changes.
+        :return: None
+        """
         self.populate_code_editor()
+
+    def on_rename_btn_executed(self):
+        """
+        Handles the logic when the rename button is executed.
+
+        - Updates the variable occurrences dictionary with the new code after replacing
+        the old variable name with the new one.
+        - Updates the list widget and code editor to reflect the changes.
+        - If 'Rename All' is checked, applies renaming to all occurrences. Otherwise, moves
+        the selection to the next occurrence in the list.
+        :return: None
+        """
+        new_name = self.new_name_line.text()
+        searched_name = self.search_line.text()
+
+        node_key = self.get_current_key()
+
+        current_code = self.get_current_code()
+        new_code = _houdini.parse_variable(current_code, searched_name, new_name)
+
+        # Update the dictionary
+        self.var_occurrences_map[node_key] = new_code
+        # print(f"Updated Code: {self.var_occurrences_map[node_key]}")
+
+        self.populate_code_editor()
+
+        current_index = self.search_result_list.currentRow()
+        if self.rename_all_check.isChecked():
+            self.rename_all()
+        else:
+            if current_index < len(self.var_occurrences_map.keys()) - 1:
+                print(current_index)
+                self.search_result_list.setCurrentRow(current_index + 1)
+                self.search_result_list.item(current_index + 1).setSelected(True)
+            else:
+                self.search_result_list.setCurrentRow(0)
+                self.search_result_list.item(0).setSelected(True)
+
+    def rename_all(self):
+        """
+        Renames all occurrences of a variable across the entire dictionary.
+
+        - Iterates through each key-value pair in the variable occurrences map.
+        - Replaces the old variable name with the new one in the code.
+        - Updates the dictionary with the modified code for each node.
+
+        :return: None
+        """
+        new_name = self.new_name_line.text()
+        searched_name = self.search_line.text()
+        for node_key, current_code in self.var_occurrences_map.items():
+            new_code = _houdini.parse_variable(current_code, searched_name, new_name)
+
+            # Update the dictionary and debug
+            self.var_occurrences_map[node_key] = new_code
+
+    def apply_all(self):
+        """
+        Saves all edited code into the corresponding Wrangle nodes.
+        :return: None
+        """
+        for node_key, current_code in self.var_occurrences_map.items():
+            node_key.parm('snippet').set(current_code)
+
+        self.new_name_line.clear()
+        self.rename_all_check.setChecked(False)
+        self.search_line.clear()
 
 
 dialog = None

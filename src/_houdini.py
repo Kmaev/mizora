@@ -2,15 +2,17 @@ import hou
 import re
 
 
-def parse_variable(node: object, old_name: str, new_name: str) -> None:
+def parse_variable(snippet_code: str, old_name: str, new_name: str) -> str:
     """
     Updates the 'snippet' parameter of a Houdini node, replacing occurrences of old_name with new_name
 
     """
-    snippet_code = node.parm('snippet').eval()
+
     if old_name in snippet_code:
         parsed_code = snippet_code.replace(old_name, new_name)
-        node.parm('snippet').set(parsed_code)
+        return parsed_code
+    else:
+        return snippet_code
 
 
 def parse_wildcard_path(path: str) -> list:
@@ -113,3 +115,4 @@ def find_variable_occurrences(context: list, searched_var: str) -> dict:
             nodes.update(find_variable_occurrences([child], searched_var))
 
     return nodes
+#TODO output message is the variable was not founded
