@@ -1,4 +1,5 @@
 import hou
+import re
 
 
 def parse_variable(node: object, old_name: str, new_name: str) -> None:
@@ -90,19 +91,22 @@ def get_hou_search_context(path: str) -> list:
 
 def find_variable_occurrences(context: list, searched_var: str) -> dict:
     """
-    Recursively finds occurrences of a searched variable in a given context.
+    Recursively finds occurrences of a searched variable in a given context using regular expressions.
+
 
     Returns:
         dict: A dictionary where keys are nodes containing the variable and values are the snippets containing it.
     """
     nodes = {}
 
+    pattern = re.compile(rf'\b{re.escape(searched_var)}\b')
+
     for geo in context:
         for child in geo.children():
             # Check if the child is attribwrangle
             if child.type().name() == 'attribwrangle':
                 snippet = child.parm('snippet').eval()
-                if searched_var in snippet:
+                if pattern.search(snippet):
                     nodes[child] = snippet
 
             # Recursive check

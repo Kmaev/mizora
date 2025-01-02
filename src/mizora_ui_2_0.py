@@ -142,7 +142,7 @@ class Assembler(QtWidgets.QDialog):
         # Debug
         """if self.search_result_list.count() > 0:
             first_item = self.search_result_list.item(0)
-            print(first_item.data(QtCore.Qt.UserRole))"""
+            print(first_item.data(QtCore.Qt.UserRole))"""   
 
     def get_selection(self, widget):
         """
