@@ -1,18 +1,16 @@
 import hou
 
-def parse_variable(node: object, old_name: str, new_name: str) -> None :
-    """
-    Updates the 'snippet' parameter of a Houdini node, replacing occurrences of old_name with new_name.
 
-    Parameters:
-        node (object): The Houdini node to be updated.
-        old_name (str): The variable name to be replaced.
-        new_name (str): The new variable name to replace the old name.
+def parse_variable(node: object, old_name: str, new_name: str) -> None:
+    """
+    Updates the 'snippet' parameter of a Houdini node, replacing occurrences of old_name with new_name
+
     """
     snippet_code = node.parm('snippet').eval()
     if old_name in snippet_code:
         parsed_code = snippet_code.replace(old_name, new_name)
         node.parm('snippet').set(parsed_code)
+
 
 def parse_wildcard_path(path: str) -> list:
     """
@@ -26,7 +24,7 @@ def parse_wildcard_path(path: str) -> list:
         if parent_node_list[0] == '/':
             parent_node_list.pop(0)
 
-        node_starts_with = parent_node_list.pop(-1) #Extract wildcard prefix
+        node_starts_with = parent_node_list.pop(-1)  # Extract wildcard prefix
         hou_parent_context = hou.node('/' + '/'.join(parent_node_list))
 
         if not hou_parent_context:
@@ -36,6 +34,7 @@ def parse_wildcard_path(path: str) -> list:
             if child.name().startswith(node_starts_with):
                 hou_path_list.append(child)
     return hou_path_list
+
 
 def get_hou_search_context(path: str) -> list:
     """
@@ -54,8 +53,9 @@ def get_hou_search_context(path: str) -> list:
     hou_contexts_list = []
 
     # Create context list based on the path
-        #Wildcard case
+    # Wildcard case
     if path.endswith("*"):
+
         hou_contexts_list = parse_wildcard_path(path)
 
     else:
@@ -65,9 +65,15 @@ def get_hou_search_context(path: str) -> list:
             hou_contexts_list.append(node)
 
         else:
+            hou.ui.displayMessage(
+                text=f"Invalid Houdini node path: {path}",
+                buttons=('OK',),
+                title="Error",
+                severity=hou.severityType.Error
+            )
             raise RuntimeError(f"Invalid Houdini node path: {path}")
 
-    #RETURN
+    # RETURN
     if hou_contexts_list:
         return hou_contexts_list
 
@@ -82,6 +88,24 @@ def get_hou_search_context(path: str) -> list:
         raise RuntimeError('No valid context was selected')
 
 
+def find_variable_occurrences(context: list, searched_var: str) -> dict:
+    """
+    Recursively finds occurrences of a searched variable in a given context.
 
+    Returns:
+        dict: A dictionary where keys are nodes containing the variable and values are the snippets containing it.
+    """
+    nodes = {}
 
+    for geo in context:
+        for child in geo.children():
+            # Check if the child is attribwrangle
+            if child.type().name() == 'attribwrangle':
+                snippet = child.parm('snippet').eval()
+                if searched_var in snippet:
+                    nodes[child] = snippet
 
+            # Recursive check
+            nodes.update(find_variable_occurrences([child], searched_var))
+
+    return nodes
