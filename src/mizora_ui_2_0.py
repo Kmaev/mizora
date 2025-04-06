@@ -10,7 +10,7 @@ reload(_houdini)
 class Assembler(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Assembler, self).__init__(parent=parent)
-        self.resize(900, 500)
+        self.resize(1300, 700)
         self.setWindowTitle('Mizora 2:0')
         self.central_layout = QtWidgets.QVBoxLayout()
         self.central_layout.setAlignment(QtCore.Qt.AlignTop)

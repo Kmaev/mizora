@@ -107,7 +107,7 @@ def find_variable_occurrences(context: list, searched_var: str) -> dict:
     """
     nodes = {}
 
-    pattern = re.compile(rf'{re.escape(searched_var)}')
+    pattern = re.compile(rf'(?<!\w){re.escape(searched_var)}(?!\w)')
     for geo in context:
         for child in geo.children():
             # Check if the child is attribwrangle
