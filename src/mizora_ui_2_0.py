@@ -266,7 +266,6 @@ class Assembler(QtWidgets.QDialog):
 
         # Update the dictionary
         self.var_occurrences_map[node_key] = new_code
-        # print(f"Updated Code: {self.var_occurrences_map[node_key]}")
 
         self.populate_code_editor()
 
@@ -317,7 +316,11 @@ class Assembler(QtWidgets.QDialog):
         self.var_occurrences_map[self.get_current_key()] = editted_code
         for node_key, current_code in self.var_occurrences_map.items():
             if node_key:
-                node_key.parm('snippet').set(current_code)
+                try:
+                    node_key.parm('snippet').set(current_code)
+                except hou.PermissionError:
+                    print(f"[Skipped] {node_key.path()} due to permission error.")
+                    continue
 
         self.new_name_line.clear()
         self.rename_all_check.setChecked(False)
