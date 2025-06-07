@@ -7,6 +7,7 @@ import _houdini
 
 reload(_houdini)
 
+
 class Assembler(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Assembler, self).__init__(parent=parent)
@@ -49,7 +50,7 @@ class Assembler(QtWidgets.QDialog):
 
         # Add Code Edit QTextEdit
         self.code_edit = QtWidgets.QTextEdit()
-        font = QtGui.QFont("Menlo", 14, QtGui.QFont.Bold)  # Font: Arial, Size: 14, Bold and Italic
+        font = QtGui.QFont("Menlo", 14, QtGui.QFont.Bold)
         self.code_edit.setCurrentFont(font)
         self.edit_grp_layout.addWidget(self.code_edit)
         self.highlighter = PythonSyntaxHighlighter(self.code_edit.document())
@@ -79,7 +80,6 @@ class Assembler(QtWidgets.QDialog):
         self.rename_grp_layout.addWidget(self.apply_btn)
 
         # Buttons connection
-        # self.test.clicked.connect(self.get_current_context)
         self.search_btn.clicked.connect(self.on_search_btn_executed)
         self.search_result_list.itemSelectionChanged.connect(self.on_list_item_changed)
         self.rename_btn.clicked.connect(self.on_rename_btn_executed)
@@ -92,7 +92,7 @@ class Assembler(QtWidgets.QDialog):
 
         # ADD STYLE SHEET
         script_dir = os.path.dirname(__file__)
-        resources_path = os.path.join(script_dir, "..", "resources")
+        resources_path = os.path.join(script_dir, "..", "..", "resources")
         resources_path = os.path.normpath(resources_path)
 
         with open(os.path.join(resources_path, "style_hou.qss"), 'r') as f:
@@ -195,8 +195,6 @@ class Assembler(QtWidgets.QDialog):
         """
         selected_item = self.get_selection(self.search_result_list)
         if selected_item:
-
-            # current_code = selected_item.data(QtCore.Qt.UserRole)
             try:
                 node_key = next(key for key in self.var_occurrences_map if key.path() == selected_item.text())
             except StopIteration:
@@ -238,8 +236,6 @@ class Assembler(QtWidgets.QDialog):
         Populates the code editor when the selection in the search results list changes.
         """
         editted_code = self.code_edit.toPlainText()
-
-        # print(editted_code)
 
         self.populate_code_editor()
         self.var_occurrences_map[self.prev_selected] = editted_code
@@ -286,9 +282,6 @@ class Assembler(QtWidgets.QDialog):
                 self.search_result_list.setCurrentRow(0)
                 self.search_result_list.item(0).setSelected(True)
 
-
-        # print(f"{self.var_occurrences_map} - On rename executed")
-
     def rename_all(self):
         """
         Renames all occurrences of a variable across the entire dictionary.
@@ -301,8 +294,6 @@ class Assembler(QtWidgets.QDialog):
         searched_name = self.search_line.text()
         for node_key, current_code in self.var_occurrences_map.items():
             new_code = _houdini.parse_variable(current_code, searched_name, new_name)
-
-            # Update the dictionary and debug
             self.var_occurrences_map[node_key] = new_code
 
     def apply_all(self):
@@ -310,7 +301,6 @@ class Assembler(QtWidgets.QDialog):
         Saves all edited code into the corresponding Wrangle nodes.
         :return: None
         """
-
         editted_code = self.code_edit.toPlainText()
 
         self.var_occurrences_map[self.get_current_key()] = editted_code
