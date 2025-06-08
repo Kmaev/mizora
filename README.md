@@ -1,12 +1,13 @@
-# mizora
-I developed this tool to assist in managing variables and code within Houdini projects. 
-It offers a range of features to work with VEX code efficiently and in an organized manner.
+Mizora: Houdini VEX Code Manager
 
-Context-Based Search: Allows searching for variables within a specified Houdini context, 
-such as /obj/my_geometry or /obj*, helping to pinpoint variable occurrences across the scene.
+Mizora is a tool designed to streamline code and variable management within Houdini projects. In complex Houdini scenes, organizing and maintaining VEX code can become tedious and error-prone. Mizora addresses this by offering efficient tools to search, edit, and refactor VEX code at scale.
 
-Variable Renaming: Facilitates renaming variables within a selected node or across multiple nodes,
-ensuring consistent variable naming throughout the project.
+Key Features:
 
-VEX Code Editing: Provides an integrated editor that supports VEX code editing, 
-with syntax highlighting to enhance readability and ease of use.
+Context-Based Search: Search for variables across specific Houdini contexts (e.g., /obj/geo1, /obj/*) to quickly locate variable definitions and usages across the scene hierarchy.
+Variable Renaming: Batch rename variables within selected nodes or across multiple nodes to maintain consistency and reduce human error.
+VEX Code Editing: Integrated code editor with syntax highlighting for VEX, improving readability and speeding up the workflow for technical artists.
+Mizora improves the maintainability of Houdini projects by reducing manual search and edit operations, helping avoid common naming mistakes and streamline VEX scripting practices.
+
+![image](https://github.com/user-attachments/assets/ad2f6727-d9b0-44e6-a9a6-9bf6798b3ee1)
+
