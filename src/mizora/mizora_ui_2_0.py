@@ -53,7 +53,7 @@ class Assembler(QtWidgets.QDialog):
         font = QtGui.QFont("Menlo", 14, QtGui.QFont.Bold)
         self.code_edit.setCurrentFont(font)
         self.edit_grp_layout.addWidget(self.code_edit)
-        self.highlighter = PythonSyntaxHighlighter(self.code_edit.document())
+        self.highlighter = VexSyntaxHighlighter(self.code_edit.document())
 
         # Add Rename Group (part of the Edit Layout)
         self.rename_grp = QtWidgets.QGroupBox()
@@ -317,7 +317,7 @@ class Assembler(QtWidgets.QDialog):
         self.search_line.clear()
 
 
-class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
+class VexSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, document):
         super().__init__(document)
         self.highlighting_rules = []
