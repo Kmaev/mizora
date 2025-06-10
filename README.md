@@ -6,6 +6,11 @@ Mizora addresses these challenges by providing tools to efficiently search, edit
 
 ---
 
+Demo Presentation:
+
+https://vimeo.com/1072891555
+
+
 ## Key Features
 
 ### Context-Based Variable Search
